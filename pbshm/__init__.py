@@ -12,7 +12,8 @@ def create_app(test_config=None):
         FOOTER_MESSAGE="Automated Statistician V1.0, PBSHM Flask Core V1.0.2, © Dynamics Research Group 2020",
         NAVIGATION={
             "modules":{
-                "Pathfinder": "pathfinder.population_list"
+                "Pathfinder": "pathfinder.population_list",
+                "Autostat": "autostat.population_list"
             }
         }
     )
@@ -34,9 +35,12 @@ def create_app(test_config=None):
     ## Pathfinder
     from pbshm.pathfinder import pathfinder
     app.register_blueprint(pathfinder.bp, url_prefix="/pathfinder")
+    ## Autostat
+    from pbshm.autostat import autostat
+    app.register_blueprint(autostat.bp, url_prefix="/autostat")
 
     #Set Root Page
-    app.add_url_rule("/", endpoint="pathfinder.population_list")
+    app.add_url_rule("/", endpoint="autostat.population_list")
     
     #Return App
     return app

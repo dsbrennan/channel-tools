@@ -35,6 +35,9 @@ def create_app(test_config=None):
     ## Pathfinder
     from pbshm.pathfinder import pathfinder
     app.register_blueprint(pathfinder.bp, url_prefix="/pathfinder")
+    ## Cleanse
+    from pbshm.cleanse import cleanse
+    app.register_blueprint(cleanse.bp, url_prefix="/cleanse")
     ## Autostat
     from pbshm.autostat import autostat
     app.register_blueprint(autostat.bp, url_prefix="/autostat")

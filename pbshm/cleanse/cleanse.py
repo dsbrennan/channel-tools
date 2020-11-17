@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, render_template
 from pbshm.authentication.authentication import authenticate_request
 from pbshm.db import structure_collection
 from urllib.parse import unquote_plus
 from json import loads as json_loads
+from pbshm.pathfinder.pathfinder import population_list as pathfinder_population_list
 
 #Create the Cleanse Blueprint
 bp = Blueprint(
@@ -436,3 +437,15 @@ def population_sterilise(population, destination):
         {"$out":destination}#Output to the destination collection
     ], allowDiskUse = True)
     return jsonify(True)
+
+#List View
+@bp.route("/populations")
+@authenticate_request("autostat-cleanse")
+def population_list():
+    return pathfinder_population_list("cleanse.population_details")
+
+#Details View
+@bp.route("/populations/<population>")
+@authenticate_request("autostat-cleanse")
+def population_details(population):
+    return render_template("details.html", population=population)

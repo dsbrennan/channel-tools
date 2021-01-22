@@ -13,6 +13,7 @@ def create_app(test_config=None):
         NAVIGATION={
             "modules":{
                 "Pathfinder": "pathfinder.population_list",
+                "Cleanse": "cleanse.population_list",
                 "Autostat": "autostat.population_list"
             }
         }

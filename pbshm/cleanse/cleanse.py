@@ -404,7 +404,7 @@ def population_sterilise(population, destination):
                     {
                         "$cond":[
                             {"$ne":[{"$type":"$channels.value"},"object"]},
-                            {"$cond":[{"$ne":["$normalisation.std",0]},{"$divide":[{"$subtract":["$channels.value","$normalisation.mean"]},"$normalisation.std"]},0]},
+                            {"$cond":[{"$ne":["$normalisation.std",0]},{"$divide":[{"$subtract":["$channels.value","$normalisation.mean"]},"$normalisation.std"]},{"$cond":[{"$eq":["$channels.type","double"]},0.0,0]}]},
                             {
                                 "min":{"$cond":[{"$ne":[{"$type":"$channels.value.min"},"null"]},{"$cond":[{"$ne":["$normalisation.std.min",0]},{"$divide":[{"$subtract":["$channels.value.min","$normalisation.mean.min"]},"$normalisation.std.min"]},0]},None]},
                                 "max":{"$cond":[{"$ne":[{"$type":"$channels.value.max"},"null"]},{"$cond":[{"$ne":["$normalisation.std.max",0]},{"$divide":[{"$subtract":["$channels.value.max","$normalisation.mean.max"]},"$normalisation.std.max"]},0]},None]},
@@ -420,8 +420,8 @@ def population_sterilise(population, destination):
         {"$group":{#Group all of the document back together by the original document id
             "_id":"$_id",
             "name":{"$first":"$name"},
-            "timestamp":{"$first":"$timestamp"},
             "population":{"$first":"$population"},
+            "timestamp":{"$first":"$timestamp"},
             "channels":{
                 "$push":"$channels"
             }
@@ -430,8 +430,8 @@ def population_sterilise(population, destination):
             "_id":0,
             "origin":"$_id",
             "name":1,
-            "timestamp":1,
             "population":1,
+            "timestamp":1,
             "channels":1
         }},
         {"$out":destination}#Output to the destination collection

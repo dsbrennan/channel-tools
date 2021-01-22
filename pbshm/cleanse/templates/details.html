@@ -98,7 +98,7 @@
             $("[data-column-template='timestamps']").each(function () {
                 var checkbox = $(this).find("input[type='checkbox'][data-attribute='timestamp']");
                 if (checkbox.is(":checked")) {
-                    timestamps.push(checkbox.val());
+                    timestamps.push(parseFloat(checkbox.val()));
                 }
             });
             var structures = [];

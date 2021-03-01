@@ -1,21 +1,10 @@
-from flask import Blueprint, jsonify, request, render_template
-from pbshm.authentication.authentication import authenticate_request
+from flask import jsonify, request
 from pbshm.db import structure_collection
 from urllib.parse import unquote_plus
 from json import loads as json_loads
-from pbshm.pathfinder.pathfinder import population_list as pathfinder_population_list
 
-#Create the Cleanse Blueprint
-bp = Blueprint(
-    "cleanse",
-    __name__,
-    template_folder = "templates"
-)
-
-#Timestamp JSON View
-@bp.route("/populations/<population>/timestamps")
-@authenticate_request("autostat-cleanse")
-def population_timestamps(population):
+#Timestamp JSON
+def timestamps(population):
     documents = []
     for document in structure_collection().aggregate([
         {"$match":{#Select the population documents with channels
@@ -86,10 +75,8 @@ def population_timestamps(population):
         documents.append(document)
     return jsonify(documents[0]) if len(documents) > 0 else jsonify({})
 
-#Structures Channels JSON View
-@bp.route("/populations/<population>/structures-channels")
-@authenticate_request("autostat-cleanse")
-def population_structures_channels(population):
+#Channels JSON
+def channels(population):
     documents = []
     for document in structure_collection().aggregate([
         {"$match":{"population":population}},#Select the population
@@ -141,10 +128,8 @@ def population_structures_channels(population):
         documents.append(document)
     return jsonify(documents[0]) if len(documents) > 0 else jsonify({})
 
-#Missing JSON View
-@bp.route("/populations/<population>/missing", methods=("GET", "POST"))
-@authenticate_request("autostat-cleanse")
-def population_missing(population):
+#Missing JSON
+def missing(population):
     #Load Structures & Channels
     structures, channels = [], []
     if request.method == "POST" and request.json:
@@ -248,10 +233,8 @@ def population_missing(population):
         documents.append(document)
     return jsonify(documents)
 
-#Statistics JSON View
-@bp.route("/populations/<population>/statistics", methods=("GET", "POST"))
-@authenticate_request("autostat-cleanse")
-def population_statistics(population):
+#Statistics JSON
+def statistics(population):
     #Get Timestamps, Structures and Channels
     timestamps, structures, channels = [], [], []
     if request.method == "POST" and request.json:
@@ -344,10 +327,8 @@ def population_statistics(population):
         documents.append(document)
     return jsonify(documents)
 
-#Sterilise JSON View
-@bp.route("/populations/<population>/sterilise/<destination>", methods=("GET", "POST"))
-@authenticate_request("autostat-cleanse")
-def population_sterilise(population, destination):
+#Sterilise JSON
+def sterilise(population, destination):
     #Get Timestamps, Structures, Channels and Statistics
     timestamps, structures, channels, statistics = [], [], [], []
     if request.method == "POST" and request.json:
@@ -437,15 +418,3 @@ def population_sterilise(population, destination):
         {"$out":destination}#Output to the destination collection
     ], allowDiskUse = True)
     return jsonify(True)
-
-#List View
-@bp.route("/populations")
-@authenticate_request("autostat-cleanse")
-def population_list():
-    return pathfinder_population_list("cleanse.population_details")
-
-#Details View
-@bp.route("/populations/<population>")
-@authenticate_request("autostat-cleanse")
-def population_details(population):
-    return render_template("details.html", population=population)

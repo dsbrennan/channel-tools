@@ -13,7 +13,7 @@ def create_app(test_config=None):
         NAVIGATION={
             "modules":{
                 "Pathfinder": "pathfinder.population_list",
-                "Cleanse": "cleanse.population_list",
+                "Cleanse": "cleanse.route_list",
                 "Autostat": "autostat.population_list"
             }
         }
@@ -37,8 +37,8 @@ def create_app(test_config=None):
     from pbshm.pathfinder import pathfinder
     app.register_blueprint(pathfinder.bp, url_prefix="/pathfinder")
     ## Cleanse
-    from pbshm.cleanse import cleanse
-    app.register_blueprint(cleanse.bp, url_prefix="/cleanse")
+    from pbshm.cleanse import routes as cleanse_routes
+    app.register_blueprint(cleanse_routes.bp, url_prefix="/cleanse")
     ## Autostat
     from pbshm.autostat import autostat
     app.register_blueprint(autostat.bp, url_prefix="/autostat")

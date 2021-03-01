@@ -46,7 +46,7 @@
 
         //Step 4: Sterilise Button
         $("#generate-sterilise").click(function () {
-            var url = '{{ url_for("cleanse.population_sterilise", population=population, destination="destination") }}';
+            var url = '{{ url_for("cleanse.route_sterilise", population=population, destination="destination") }}';
             url = url.replace("destination", $("[data-sterilise-attribute='destination-population']").val());
             sanisieHTTPRequest.open("POST", url);
             sanisieHTTPRequest.setRequestHeader("Accept", "application/json");
@@ -116,7 +116,7 @@
                 }
             });
             steriliseRequestBody = { "timestamps": timestamps, "structures": structures, "channels": channels };
-            statisticsHTTPRequest.open("POST", '{{ url_for("cleanse.population_statistics", population=population) }}');
+            statisticsHTTPRequest.open("POST", '{{ url_for("cleanse.route_statistics", population=population) }}');
             statisticsHTTPRequest.setRequestHeader("Accept", "application/json");
             statisticsHTTPRequest.setRequestHeader("Content-Type", "application/json");
             statisticsHTTPRequest.send(JSON.stringify(steriliseRequestBody));
@@ -175,7 +175,7 @@
                     channels.push(JSON.parse(checkbox.val()));
                 }
             });
-            missingHTTPRequest.open("POST", '{{ url_for("cleanse.population_missing", population=population) }}');
+            missingHTTPRequest.open("POST", '{{ url_for("cleanse.route_missing", population=population) }}');
             missingHTTPRequest.setRequestHeader("Accept", "application/json");
             missingHTTPRequest.setRequestHeader("Content-Type", "application/json");
             missingHTTPRequest.send(JSON.stringify({ "structures": structures, "channels": channels }));
@@ -251,11 +251,11 @@
             }
             card.find("[data-remote-field='missing']").text(missingCSV);
         }, function () {
-            structuresChannelsHTTPRequest.open("GET", '{{ url_for("cleanse.population_structures_channels", population=population) }}');
+            structuresChannelsHTTPRequest.open("GET", '{{ url_for("cleanse.route_channels", population=population) }}');
             structuresChannelsHTTPRequest.setRequestHeader("Accept", "application/json");
             structuresChannelsHTTPRequest.send();
         });
-        timestampHTTPRequest.open("GET", '{{ url_for("cleanse.population_timestamps", population=population) }}');
+        timestampHTTPRequest.open("GET", '{{ url_for("cleanse.route_timestamps", population=population) }}');
         timestampHTTPRequest.setRequestHeader("Accept", "application/json");
         timestampHTTPRequest.send();
 

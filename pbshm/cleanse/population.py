@@ -1,9 +1,8 @@
-from flask import jsonify, request
 from pbshm.db import structure_collection
 from urllib.parse import unquote_plus
 from json import loads as json_loads
 
-#Timestamp JSON
+#Timestamp
 def timestamps(population):
     documents = []
     for document in structure_collection().aggregate([
@@ -73,9 +72,9 @@ def timestamps(population):
         }}
     ]):
         documents.append(document)
-    return jsonify(documents[0]) if len(documents) > 0 else jsonify({})
+    return documents[0] if len(documents) > 0 else {}
 
-#Channels JSON
+#Channels
 def channels(population):
     documents = []
     for document in structure_collection().aggregate([
@@ -126,20 +125,10 @@ def channels(population):
         {"$limit":1}#Return only 1 document
     ]):
         documents.append(document)
-    return jsonify(documents[0]) if len(documents) > 0 else jsonify({})
+    return documents[0] if len(documents) > 0 else {}
 
-#Missing JSON
-def missing(population):
-    #Load Structures & Channels
-    structures, channels = [], []
-    if request.method == "POST" and request.json:
-        structures = request.json["structures"] if "structures" in request.json else []
-        channels = request.json["channels"] if "channels" in request.json else []
-    elif request.method == "GET" and request.args.get("data"):
-        data = json_loads(unquote_plus(request.args.get("data")))
-        structures = data["structures"] if "structures" in data else []
-        channels = data["channels"] if "channels" in data else []
-
+#Missing
+def missing(population, structures, channels):
     #Calculate Missing
     documents = []
     for document in structure_collection().aggregate([
@@ -231,22 +220,10 @@ def missing(population):
         {"$sort":{"timestamp":1}}#Sort via timestamp
     ], allowDiskUse = True):
         documents.append(document)
-    return jsonify(documents)
+    return documents
 
-#Statistics JSON
-def statistics(population):
-    #Get Timestamps, Structures and Channels
-    timestamps, structures, channels = [], [], []
-    if request.method == "POST" and request.json:
-        timestamps = request.json["timestamps"] if "timestamps" in request.json else []
-        structures = request.json["structures"] if "structures" in request.json else []
-        channels = request.json["channels"] if "channels" in request.json else []
-    elif request.method == "GET" and request.args.get("data"):
-        data = json_loads(unquote_plus(request.args.get("data")))
-        timestamps = data["timestamps"] if "timestamps" in data else []
-        structures = data["structures"] if "structures" in data else []
-        channels = data["channels"] if "channels" in data else []
-
+#Statistics
+def statistics(population, timestamps, structures, channels):
     #Generate Mean and Standard Deviation per channels
     documents = []
     for document in structure_collection().aggregate([
@@ -325,24 +302,10 @@ def statistics(population):
         {"$sort":{"name":1}}#Order the results by channel name
     ], allowDiskUse = True):
         documents.append(document)
-    return jsonify(documents)
+    return documents
 
-#Sterilise JSON
-def sterilise(population, destination):
-    #Get Timestamps, Structures, Channels and Statistics
-    timestamps, structures, channels, statistics = [], [], [], []
-    if request.method == "POST" and request.json:
-        timestamps = request.json["timestamps"] if "timestamps" in request.json else []
-        structures = request.json["structures"] if "structures" in request.json else []
-        channels = request.json["channels"] if "channels" in request.json else []
-        statistics = request.json["statistics"] if "statistics" in request.json else []
-    elif request.method == "GET" and request.args.get("data"):
-        data = json_loads(unquote_plus(request.args.get("data")))
-        timestamps = data["timestamps"] if "timestamps" in data else []
-        structures = data["structures"] if "structures" in data else []
-        channels = data["channels"] if "channels" in data else []
-        statistics = data["statistics"] if "statistics" in data else []
-
+#Sterilise
+def sterilise(population, timestamps, structures, channels, statistics, destination):
     #Sterilise data into destination
     structure_collection().aggregate([
         {"$match":{#Select the population and structures whilst excluding the timestamps
@@ -417,4 +380,4 @@ def sterilise(population, destination):
         }},
         {"$out":destination}#Output to the destination collection
     ], allowDiskUse = True)
-    return jsonify(True)
+    return True

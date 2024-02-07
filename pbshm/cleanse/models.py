@@ -1,9 +1,11 @@
+from functools import wraps
+from json import dumps as json_dumps, loads as json_loads
+from time import time as time_seconds
+from typing import List, Dict, Union
+
 from bson.int64 import Int64
 from bson.objectid import ObjectId
-from time import time as time_seconds
-from functools import wraps
-from typing import List, Dict, Union
-from json import dumps as json_dumps, loads as json_loads
+
 from pbshm.db import db_connect
 from pbshm.cleanse.population import timestamps, channels, missing, statistics, sterilise
 

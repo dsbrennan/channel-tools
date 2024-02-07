@@ -227,7 +227,7 @@ def population_statistics(population):
             fig = figure(
                 tools="pan,box_zoom,reset,save",
                 output_backend="webgl",
-                plot_height=375,
+                height=375,
                 sizing_mode="scale_width",
                 title="Population: {population} Channels: {channels}".format(
                     population=population,

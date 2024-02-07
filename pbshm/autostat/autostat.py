@@ -1,14 +1,16 @@
-from flask import Blueprint, current_app, g, render_template, request, session, redirect, url_for, jsonify
-from pbshm.authentication.authentication import authenticate_request
-from pbshm.db import structure_collection
-from datetime import datetime
-from bokeh import colors
-from bokeh.plotting import figure
-from bokeh.embed import components
-from random import randint
-from pbshm.pathfinder.pathfinder import population_list as pathfinder_population_list, datetime_to_nanoseconds_since_epoch
 import math
 import statistics
+from datetime import datetime
+from random import randint
+
+from bokeh import colors
+from bokeh.embed import components
+from bokeh.plotting import figure
+from flask import Blueprint, render_template, request, jsonify
+
+from pbshm.authentication import authenticate_request
+from pbshm.db import structure_collection
+from pbshm.timekeeper import datetime_to_nanoseconds_since_epoch
 
 #Create the Autostat Blueprint
 bp = Blueprint(

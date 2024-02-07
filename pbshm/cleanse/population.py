@@ -1,6 +1,4 @@
 from pbshm.db import structure_collection
-from urllib.parse import unquote_plus
-from json import loads as json_loads
 
 #Timestamp
 def timestamps(population):

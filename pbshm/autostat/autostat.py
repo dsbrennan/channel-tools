@@ -10,7 +10,7 @@ from flask import Blueprint, render_template, request, jsonify
 
 from pbshm.authentication import authenticate_request
 from pbshm.db import default_collection
-from pbshm.timekeeper import datetime_to_nanoseconds_since_epoch
+from pbshm.timekeeper import datetime_to_nanoseconds_since_epoch, convert_nanoseconds
 
 #Create the Autostat Blueprint
 bp = Blueprint(
@@ -118,8 +118,32 @@ def population_details(population):
 #List View
 @bp.route("/populations")
 @authenticate_request("autostat-list")
-def population_list():
-    return pathfinder_population_list("autostat.population_statistics")
+def population_list(link_name = "view", link_endpoint = "autostat.population_statistics"):
+    populations=[]
+    for document in default_collection().aggregate([
+        {"$group":{
+            "_id": "$population",
+            "structure_names": {"$addToSet": "$name"},
+            "channel_names": {"$addToSet": "$channels.name"},
+            "start_date": {"$first": "$timestamp"},
+            "end_date": {"$last": "$timestamp"}
+        }},
+        {"$project":{
+            "_id": 0,
+            "population_name": "$_id",
+            "structure_names": 1,
+            "channel_names": 1,
+            "start_date": 1,
+            "end_date": 1
+        }},
+        {"$sort": {"population_name": 1}}
+    ]):
+        document["link_name"] = link_name
+        document["link_endpoint"] = link_endpoint
+        document["start_date_time"] = convert_nanoseconds(document["start_date"], "datetime")
+        document["end_date_time"] = convert_nanoseconds(document["end_date"], "datetime")
+        populations.append(document)
+    return render_template("list-populations.html", populations=populations)
 
 #Statistics View
 @bp.route("/populations/<population>/statistics", methods=("GET", "POST"))

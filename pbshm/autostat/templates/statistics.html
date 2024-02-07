@@ -29,7 +29,7 @@
                 if (json.name.length == 0) $("#request-error").text("No population details found").parent().removeClass("d-none");
                 else {
                     //End Date
-                    var timestampConvertEndpoint = '{{ url_for("pathfinder.convert_nanoseconds", nanoseconds=0, unit="milliseconds") }}';
+                    var timestampConvertEndpoint = '{{ url_for("timekeeper.convert_nanoseconds", nanoseconds=0, unit="milliseconds") }}';
                     var timestampConvertHttpRequest = new XMLHttpRequest();
                     timestampConvertHttpRequest.onreadystatechange = function () {
                         if (this.readyState == 4 && this.status == 200) {

@@ -9,7 +9,7 @@ from bokeh.plotting import figure
 from flask import Blueprint, render_template, request, jsonify
 
 from pbshm.authentication import authenticate_request
-from pbshm.db import structure_collection
+from pbshm.db import default_collection
 from pbshm.timekeeper import datetime_to_nanoseconds_since_epoch
 
 #Create the Autostat Blueprint
@@ -52,7 +52,7 @@ def calculate_statistical_analysis(channel_y, channel_value_sum, channel_mean, c
 @authenticate_request("autostat-statistics")
 def population_details(population):
     populations=[]
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{"population":population}},
         {"$project":{
             "_id":0,
@@ -127,7 +127,7 @@ def population_list():
 def population_statistics(population):
     #Load All Populations
     populations=[]
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$group":{"_id":"$population"}},
         {"$sort":{"_id":1}}
     ]):
@@ -168,7 +168,7 @@ def population_statistics(population):
             project["channels"] = {"$filter":{"input":"$channels", "as":"channel", "cond":{"$or":[{"$eq":["$$channel.name", channel]} for channel in channels]}}} if channels else 1
             #Query the database
             channel_x, channel_y, channel_value_sum = {}, {}, {}
-            for document in structure_collection().aggregate([
+            for document in default_collection().aggregate([
                 {"$match":match},
                 {"$project":project}
             ]):

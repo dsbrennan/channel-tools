@@ -7,7 +7,7 @@ from bson.int64 import Int64
 from bson.objectid import ObjectId
 
 from pbshm.db import db_connect
-from pbshm.cleanse.population import timestamps, channels, missing, statistics, sterilise
+from pbshm.cleanse.procedures import timestamps, channels, missing, statistics, sterilise
 
 #Measure Metric Method Decorator
 def measure_metric(key: str):

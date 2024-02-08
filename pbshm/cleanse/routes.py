@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request, render_template
 
 from pbshm.authentication import authenticate_request
 from pbshm.autostat import population_list
-from pbshm.cleanse.population import timestamps, channels, missing, statistics, sterilise
+from pbshm.cleanse.procedures import timestamps, channels, missing, statistics, sterilise
 
 #Create the Cleanse Blueprint
 bp = Blueprint(

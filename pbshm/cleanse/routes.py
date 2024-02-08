@@ -4,6 +4,7 @@ from urllib.parse import unquote_plus
 from flask import Blueprint, jsonify, request, render_template
 
 from pbshm.authentication import authenticate_request
+from pbshm.autostat import population_list
 from pbshm.cleanse.population import timestamps, channels, missing, statistics, sterilise
 
 #Create the Cleanse Blueprint
@@ -80,7 +81,7 @@ def route_sterilise(population, destination):
 @bp.route("/populations")
 @authenticate_request("autostat-cleanse")
 def route_list():
-    return population_list("cleanse.route_details")
+    return population_list("cleanse", "cleanse.route_details")
 
 #Details View
 @bp.route("/populations/<population>")

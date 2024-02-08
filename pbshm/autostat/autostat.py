@@ -1,14 +1,16 @@
-from flask import Blueprint, current_app, g, render_template, request, session, redirect, url_for, jsonify
-from pbshm.authentication.authentication import authenticate_request
-from pbshm.db import structure_collection
-from datetime import datetime
-from bokeh import colors
-from bokeh.plotting import figure
-from bokeh.embed import components
-from random import randint
-from pbshm.pathfinder.pathfinder import population_list as pathfinder_population_list, datetime_to_nanoseconds_since_epoch
 import math
 import statistics
+from datetime import datetime
+from random import randint
+
+from bokeh import colors
+from bokeh.embed import components
+from bokeh.plotting import figure
+from flask import Blueprint, render_template, request, jsonify
+
+from pbshm.authentication import authenticate_request
+from pbshm.db import default_collection
+from pbshm.timekeeper import datetime_to_nanoseconds_since_epoch, convert_nanoseconds
 
 #Create the Autostat Blueprint
 bp = Blueprint(
@@ -50,7 +52,7 @@ def calculate_statistical_analysis(channel_y, channel_value_sum, channel_mean, c
 @authenticate_request("autostat-statistics")
 def population_details(population):
     populations=[]
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{"population":population}},
         {"$project":{
             "_id":0,
@@ -116,8 +118,32 @@ def population_details(population):
 #List View
 @bp.route("/populations")
 @authenticate_request("autostat-list")
-def population_list():
-    return pathfinder_population_list("autostat.population_statistics")
+def population_list(link_name = "view", link_endpoint = "autostat.population_statistics"):
+    populations=[]
+    for document in default_collection().aggregate([
+        {"$group":{
+            "_id": "$population",
+            "structure_names": {"$addToSet": "$name"},
+            "channel_names": {"$addToSet": "$channels.name"},
+            "start_date": {"$first": "$timestamp"},
+            "end_date": {"$last": "$timestamp"}
+        }},
+        {"$project":{
+            "_id": 0,
+            "population_name": "$_id",
+            "structure_names": 1,
+            "channel_names": 1,
+            "start_date": 1,
+            "end_date": 1
+        }},
+        {"$sort": {"population_name": 1}}
+    ]):
+        document["link_name"] = link_name
+        document["link_endpoint"] = link_endpoint
+        document["start_date_time"] = convert_nanoseconds(document["start_date"], "datetime")
+        document["end_date_time"] = convert_nanoseconds(document["end_date"], "datetime")
+        populations.append(document)
+    return render_template("list-populations.html", populations=populations)
 
 #Statistics View
 @bp.route("/populations/<population>/statistics", methods=("GET", "POST"))
@@ -125,7 +151,7 @@ def population_list():
 def population_statistics(population):
     #Load All Populations
     populations=[]
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$group":{"_id":"$population"}},
         {"$sort":{"_id":1}}
     ]):
@@ -151,8 +177,8 @@ def population_statistics(population):
         #Process request if no errors
         if error is None:
             #Create Match and Project aggregate steps
-            startTimestamp = datetime_to_nanoseconds_since_epoch(datetime(startDateParts[0], startDateParts[1], startDateParts[2], startTimeParts[0], startTimeParts[1]))
-            endTimestamp = datetime_to_nanoseconds_since_epoch(datetime(endDateParts[0], endDateParts[1], endDateParts[2], endTimeParts[0], endTimeParts[1]))
+            startTimestamp = datetime_to_nanoseconds_since_epoch(datetime(startDateParts[0], startDateParts[1], startDateParts[2], startTimeParts[0], startTimeParts[1], 0, 0))
+            endTimestamp = datetime_to_nanoseconds_since_epoch(datetime(endDateParts[0], endDateParts[1], endDateParts[2], endTimeParts[0], endTimeParts[1], 59, 999999))
             match = {
                 "population":population,
                 "timestamp":{"$gte":startTimestamp, "$lte":endTimestamp}
@@ -166,7 +192,7 @@ def population_statistics(population):
             project["channels"] = {"$filter":{"input":"$channels", "as":"channel", "cond":{"$or":[{"$eq":["$$channel.name", channel]} for channel in channels]}}} if channels else 1
             #Query the database
             channel_x, channel_y, channel_value_sum = {}, {}, {}
-            for document in structure_collection().aggregate([
+            for document in default_collection().aggregate([
                 {"$match":match},
                 {"$project":project}
             ]):
@@ -201,7 +227,7 @@ def population_statistics(population):
             fig = figure(
                 tools="pan,box_zoom,reset,save",
                 output_backend="webgl",
-                plot_height=375,
+                height=375,
                 sizing_mode="scale_width",
                 title="Population: {population} Channels: {channels}".format(
                     population=population,

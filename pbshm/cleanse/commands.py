@@ -1,5 +1,6 @@
 import click
 from flask import Blueprint, current_app
+
 from pbshm.cleanse.models import *
 
 #Create Cleanse cli Blueprint

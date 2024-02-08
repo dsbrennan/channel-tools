@@ -1,3 +1,2 @@
-Flask==1.1.2
-pymongo==3.10.1
-bokeh==2.1.0
+pbshm-core>=1.1.1
+bokeh==3.3.4

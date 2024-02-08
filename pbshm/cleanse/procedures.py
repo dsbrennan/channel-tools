@@ -1,11 +1,10 @@
-from pbshm.db import structure_collection
-from urllib.parse import unquote_plus
-from json import loads as json_loads
+from pbshm.db import default_collection
+from pbshm.mechanic import create_new_structure_collection
 
 #Timestamp
 def timestamps(population):
     documents = []
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{#Select the population documents with channels
             "population":population,
             "channels":{"$exists":True}
@@ -77,7 +76,7 @@ def timestamps(population):
 #Channels
 def channels(population):
     documents = []
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{"population":population}},#Select the population
         {"$project":{#Keep only the name, channel name and channel type
             "_id":0,
@@ -131,7 +130,7 @@ def channels(population):
 def missing(population, structures, channels):
     #Calculate Missing
     documents = []
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{"population":population}},#Select the Population
         {"$project":{#Keep only the timestamp, name channel name and channel type fields
             "_id":0,
@@ -226,7 +225,7 @@ def missing(population, structures, channels):
 def statistics(population, timestamps, structures, channels):
     #Generate Mean and Standard Deviation per channels
     documents = []
-    for document in structure_collection().aggregate([
+    for document in default_collection().aggregate([
         {"$match":{#Select the population and structures and exclude document in the timestamp list
             "population":population,
             "timestamp":{"$nin":timestamps},
@@ -306,8 +305,10 @@ def statistics(population, timestamps, structures, channels):
 
 #Sterilise
 def sterilise(population, timestamps, structures, channels, statistics, destination):
+    #Create output collection
+    create_new_structure_collection(destination)
     #Sterilise data into destination
-    structure_collection().aggregate([
+    default_collection().aggregate([
         {"$match":{#Select the population and structures whilst excluding the timestamps
             "population":population,
             "timestamp":{"$nin":timestamps},

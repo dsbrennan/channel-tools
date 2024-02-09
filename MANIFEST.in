@@ -1,2 +1,2 @@
-global-include *.html
+recursive-include pbshm *.html
 exclude pbshm/__init__.py

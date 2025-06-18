@@ -1,2 +1,2 @@
-pbshm-core>=1.1.1
-bokeh==3.3.4
+pbshm-core==1.1.6
+bokeh==3.7.3
